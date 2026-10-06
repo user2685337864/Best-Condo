@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       name: data.profile?.name || data.guild?.name || 'Discord',
       memberCount: data.approximate_member_count ?? data.profile?.member_count ?? null,
       onlineCount: data.approximate_presence_count ?? data.profile?.online_count ?? null,
-      inviteUrl: 'https://discord.gg/2kSQztRfvu',
+      inviteUrl: 'https://discord.gg/xskrFJ8QQc',
     });
   } catch (error) {
     return res.status(502).json({ error: 'Unable to fetch Discord statistics' });
