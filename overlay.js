@@ -109,40 +109,6 @@
   }
 
   /* ═══════════════════════════════════════════════════
-     PROMO VIDEO — native browser player, between title
-     and Featured Games section
-  ═══════════════════════════════════════════════════ */
-  var promoInjected = false;
-
-  function tryInjectPromo() {
-    if (promoInjected) return;
-
-    // Wait until at least one game card is in the DOM
-    var firstCard = document.querySelector('[data-testid^="card-game-"]');
-    if (!firstCard) return;
-
-    promoInjected = true;
-
-    // Walk up: card → grid div → section (games section)
-    var gamesSection = firstCard.parentElement;   // grid div
-    if (gamesSection) gamesSection = gamesSection.parentElement; // section wrapper
-    if (!gamesSection || !gamesSection.parentElement) return;
-
-    var wrapper = document.createElement('div');
-    wrapper.id = 'rc-promo-section';
-    wrapper.style.cssText = 'margin-bottom:32px;';
-
-    var video = document.createElement('video');
-    video.id  = 'rc-promo-video';
-    video.src = '/promo-video.mp4';
-    video.controls = true;
-    video.style.cssText = 'width:100%;display:block;border-radius:8px;background:#000;max-height:65vh;';
-
-    wrapper.appendChild(video);
-    gamesSection.parentElement.insertBefore(wrapper, gamesSection);
-  }
-
-  /* ═══════════════════════════════════════════════════
      VERIFICATION OVERLAY
   ═══════════════════════════════════════════════════ */
   function injectVerifyStyles() {
@@ -325,7 +291,6 @@
       el.addEventListener('click', playClick);
     });
 
-    tryInjectPromo();
     tryInjectTokenInfo();
 
     // Game access buttons — always let through, just log
