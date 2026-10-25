@@ -8,7 +8,7 @@
 :root {
   --app-font-sans: 'Outfit', 'Inter', sans-serif;
   --radius: 1rem;
-  --background: 228 60% 4%;
+  --background: 330 60% 4%;
   --foreground: 330 40% 97%;
   --border: 330 60% 14%;
   --input: 330 60% 16%;
@@ -31,12 +31,12 @@
 
 /* ── 2. Override ALL Tailwind reds → deep pink ─────────────── */
 :root, :host {
-  --color-red-50:  oklch(97%  0.01  258);
-  --color-red-300: oklch(76%  0.13  258);
-  --color-red-400: oklch(65%  0.19  258);
-  --color-red-500: oklch(57%  0.23  258);
-  --color-red-600: oklch(51%  0.24  258);
-  --color-red-800: oklch(37%  0.16  258);
+  --color-red-50:  oklch(97%  0.01  350);
+  --color-red-300: oklch(76%  0.13  350);
+  --color-red-400: oklch(65%  0.19  350);
+  --color-red-500: oklch(57%  0.23  350);
+  --color-red-600: oklch(51%  0.24  350);
+  --color-red-800: oklch(37%  0.16  350);
 }
 
 /* ── 3. Global Base ────────────────────────────────────────── */
@@ -46,11 +46,11 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Outfit', 'Inter', sans-serif !important;
-  background-color: #040913 !important;
+  background-color: #09070b !important;
   background-image:
-    radial-gradient(ellipse 100% 60% at 50% -5%,  rgba(219,39,119,0.18)  0%, transparent 70%),
-    radial-gradient(ellipse 60%  60% at 90% 100%, rgba(190,24,93,0.10)  0%, transparent 70%),
-    radial-gradient(ellipse 40%  40% at 10% 80%,  rgba(236,72,153,0.07) 0%, transparent 60%) !important;
+    radial-gradient(ellipse 100% 60% at 50% -5%,  rgba(219,39,119,0.22)  0%, transparent 70%),
+    radial-gradient(ellipse 60%  60% at 90% 100%, rgba(190,24,93,0.14)  0%, transparent 70%),
+    radial-gradient(ellipse 40%  40% at 10% 80%,  rgba(236,72,153,0.10) 0%, transparent 60%) !important;
   min-height: 100vh;
 }
 
@@ -60,8 +60,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(236,72,153,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(236,72,153,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(236,72,153,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(236,72,153,0.055) 1px, transparent 1px);
   background-size: 52px 52px;
   pointer-events: none;
   z-index: 0;
@@ -169,7 +169,7 @@ h2 {
   box-shadow:
     0 4px 24px rgba(0,0,0,0.5),
     inset 0 1px 0 rgba(255,255,255,0.04),
-    inset 0 0 0 1px rgba(236,72,153,0.04) !important;
+    inset 0 0 0 1px rgba(236,72,153,0.055) !important;
   backdrop-filter: blur(16px) !important;
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
   position: relative !important;
