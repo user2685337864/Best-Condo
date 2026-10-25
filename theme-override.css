@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ═══════════════════════════════════════════════════════════
-   COMPLETE VISUAL REDESIGN — Blue Cyber / Deep Space
+   COMPLETE VISUAL REDESIGN — Pink Cyber / Deep Space
    ═══════════════════════════════════════════════════════════ */
 
 /* ── 1. CSS Variables ──────────────────────────────────────── */
@@ -29,7 +29,7 @@
   --destructive-foreground: 0 0% 100%;
 }
 
-/* ── 2. Override ALL Tailwind reds → deep blue ─────────────── */
+/* ── 2. Override ALL Tailwind reds → deep pink ─────────────── */
 :root, :host {
   --color-red-50:  oklch(97%  0.01  258);
   --color-red-300: oklch(76%  0.13  258);
@@ -94,7 +94,7 @@ h1, h2, h3, h4, h5, h6 {
 .sticky.top-0,
 header {
   background: rgba(4, 9, 19, 0.80) !important;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.14) !important;
+  border-bottom: 1px solid rgba(236,72,153,0.14) !important;
   box-shadow:
     0 1px 0 rgba(236,72,153,0.08),
     0 4px 40px rgba(4,9,19,0.8) !important;
@@ -133,14 +133,14 @@ header {
   box-shadow: 0 0 12px rgba(236,72,153,0.1) !important;
 }
 
-/* Live dot — pulse stays blue */
-[class*="rounded-full"][class*="bg-blue"],
+/* Live dot — pulse stays pink */
+[class*="rounded-full"][class*="bg-pink"],
 [class*="rounded-full"][class*="bg-primary"] {
   background: #ec4899 !important;
   box-shadow: 0 0 8px rgba(236,72,153,0.8) !important;
 }
 
-/* "Condo" blue text */
+/* "Condo" pink text */
 .text-pink-400, .text-pink-500, .text-primary {
   color: #f472b6 !important;
   text-shadow: 0 0 30px rgba(244,114,182,0.4);
@@ -218,7 +218,7 @@ h2 {
 }
 
 /* Tag badges */
-[class*="bg-blue"][class*="text-blue"],
+[class*="bg-pink"][class*="text-pink"],
 [class*="rounded"][class*="text-xs"][class*="font-semibold"] {
   border-radius: 0.5rem !important;
   font-weight: 600 !important;
