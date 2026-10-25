@@ -57,14 +57,14 @@
     if (document.getElementById('rc-paw-styles')) return;
     var style = document.createElement('style');
     style.id = 'rc-paw-styles';
-    style.textContent = '@keyframes rc-paw-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(-18deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(8deg)}100%{opacity:0;transform:translate(-50%,-105px) scale(.82) rotate(20deg)}}.rc-cat-paw{position:fixed;z-index:2147483647;pointer-events:none;font-size:30px;line-height:1;filter:drop-shadow(0 3px 8px rgba(219,39,119,.45));animation:rc-paw-pop .72s cubic-bezier(.2,.75,.25,1) forwards;will-change:transform,opacity;}';
+    style.textContent = '@keyframes rc-paw-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(-18deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(8deg)}100%{opacity:0;transform:translate(-50%,-105px) scale(.82) rotate(20deg)}}.rc-cat-paw{position:fixed;z-index:2147483647;width:42px;height:42px;pointer-events:none;filter:drop-shadow(0 3px 8px rgba(219,39,119,.55));animation:rc-paw-pop .72s cubic-bezier(.2,.75,.25,1) forwards;will-change:transform,opacity;}';
     document.head.appendChild(style);
   }
   function showCatPaw(x, y) {
     injectPawStyles();
     var paw = document.createElement('span');
     paw.className = 'rc-cat-paw';
-    paw.textContent = '🐾';
+    paw.innerHTML = '<svg viewBox="0 0 64 64" width="42" height="42" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><g fill="#f472b6" stroke="#f9a8d4" stroke-width="1.2"><ellipse cx="32" cy="42" rx="14" ry="12"/><ellipse cx="16" cy="25" rx="5.4" ry="8" transform="rotate(-28 16 25)"/><ellipse cx="27" cy="18" rx="5.3" ry="8.5" transform="rotate(-8 27 18)"/><ellipse cx="39" cy="18" rx="5.3" ry="8.5" transform="rotate(8 39 18)"/><ellipse cx="50" cy="25" rx="5.4" ry="8" transform="rotate(28 50 25)"/></g></svg>';
     paw.setAttribute('aria-hidden', 'true');
     paw.style.left = x + 'px';
     paw.style.top = y + 'px';
