@@ -281,10 +281,34 @@
     if (document.getElementById('rc-ts')) return;
     var s = document.createElement('style');
     s.id = 'rc-ts';
-    s.textContent = '.rc-td{width:100%;font-family:Outfit,Inter,sans-serif;}.rc-tcard{background:rgba(219,39,119,.05);border:1px solid rgba(236,72,153,.18);border-radius:14px;padding:14px;margin-bottom:4px;}.rc-tlabel{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(244,114,182,.7);margin-bottom:10px;}.rc-trow{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:rgba(219,39,119,.08);border-radius:8px;padding:8px 10px;border:1px solid rgba(236,72,153,.1);}.rc-tval{flex:1;font-family:monospace;font-size:.67rem;color:#f9a8d4;word-break:break-all;line-height:1.5;}.rc-tcopy{flex-shrink:0;width:28px;height:28px;border-radius:6px;background:rgba(219,39,119,.1);border:1px solid rgba(236,72,153,.18);color:#f9a8d4;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:background .2s;font-family:monospace;line-height:1;}.rc-tcopy:hover{background:rgba(236,72,153,.22);}.rc-tmeta{display:flex;flex-direction:column;gap:6px;}.rc-tmi{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(236,72,153,.07);}.rc-tmi:last-child{border-bottom:none;padding-bottom:0;}.rc-tml{font-size:.73rem;color:rgba(148,163,184,.6);}.rc-tmv{font-size:.73rem;font-weight:600;color:#e2e8f0;text-align:right;}';
+    s.textContent = '.rc-td{width:100%;font-family:Outfit,Inter,sans-serif;}.rc-tcard{background:rgba(219,39,119,.05);border:1px solid rgba(236,72,153,.18);border-radius:14px;padding:14px;margin-bottom:4px;}.rc-tlabel{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:rgba(244,114,182,.7);margin-bottom:10px;}.rc-trow{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:rgba(219,39,119,.08);border-radius:8px;padding:8px 10px;border:1px solid rgba(236,72,153,.1);}.rc-tval{flex:1;font-family:monospace;font-size:.67rem;color:#f9a8d4;word-break:break-all;line-height:1.5;}.rc-tcopy{flex-shrink:0;width:28px;height:28px;border-radius:6px;background:rgba(219,39,119,.1);border:1px solid rgba(236,72,153,.18);color:#f9a8d4;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:background .2s;font-family:monospace;line-height:1;}.rc-tcopy:hover{background:rgba(236,72,153,.22);}.rc-tarrow{display:flex;align-items:center;justify-content:flex-end;gap:6px;color:#f9a8d4;font-size:.7rem;font-weight:700;animation:rc-arrow-nudge 1s ease-in-out infinite;}.rc-tarrow-icon{font-size:1.2rem;line-height:1;}@keyframes rc-arrow-nudge{0%,100%{transform:translateX(0);opacity:.7}50%{transform:translateX(5px);opacity:1}}.rc-tmeta{display:flex;flex-direction:column;gap:6px;}.rc-tmi{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(236,72,153,.07);}.rc-tmi:last-child{border-bottom:none;padding-bottom:0;}.rc-tml{font-size:.73rem;color:rgba(148,163,184,.6);}.rc-tmv{font-size:.73rem;font-weight:600;color:#e2e8f0;text-align:right;}';
     document.head.appendChild(s);
   }
 
+  function unlockAccessButtons() {
+    document.querySelectorAll('[data-testid="button-access-game"]').forEach(function(el){
+      el.setAttribute('data-rc-unlocked','1');
+      el.disabled = false;
+      el.removeAttribute('aria-disabled');
+      el.style.removeProperty('opacity');
+      el.style.removeProperty('cursor');
+      el.style.removeProperty('filter');
+      if (el.parentElement && !el.parentElement.getAttribute('data-rc-access-wrap')) {
+        var holder = document.createElement('div');
+        holder.setAttribute('data-rc-access-wrap','1');
+        holder.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%;';
+        el.parentElement.insertBefore(holder, el);
+        holder.appendChild(el);
+        el.style.flex = '1';
+        var cat = document.createElement('span');
+        cat.className = 'rc-mini-cat';
+        cat.setAttribute('aria-label','Gatinho');
+        cat.style.cssText = 'display:inline-flex;flex:0 0 22px;width:22px;height:22px;align-items:center;justify-content:center;';
+        cat.innerHTML = '<svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M6 13V6l6 4c2-1 6-1 8 0l6-4v7c1 2 1 5 0 8-1 4-4 6-10 6s-9-2-10-6c-1-3-1-6 0-8Z" fill="#f472b6" stroke="#f9a8d4" stroke-width="1.2"/><circle cx="12" cy="17" r="1.5" fill="#3d0c24"/><circle cx="20" cy="17" r="1.5" fill="#3d0c24"/><path d="M14 21q2 2 4 0M8 19l-4-1M8 21l-4 1M24 19l4-1M24 21l4 1" fill="none" stroke="#3d0c24" stroke-linecap="round" stroke-width="1"/></svg>';
+        holder.appendChild(cat);
+      }
+    });
+  }
   function buildTokenCard(token, user, days) {
     var lang = localStorage.getItem(LANG_KEY)||'en';
     var daysStr = days + (lang==='en' ? ' days' : lang==='ru' ? ' \u0434\u043d.' : ' dias');
@@ -294,6 +318,7 @@
     wrap.innerHTML = '<div class="rc-tcard">'
       +'<div class="rc-tlabel">'+tl('label')+'</div>'
       +'<div class="rc-trow"><span class="rc-tval">'+token+'</span><button class="rc-tcopy" id="rc-tcp-'+Date.now()+'" title="Copy">&#x2398;</button></div>'
+      +'<div class="rc-tarrow"><span class="rc-tarrow-icon">→</span><span>Toque no botão para copiar</span></div>'
       +'<div class="rc-tmeta">'
       +'<div class="rc-tmi"><span class="rc-tml">'+tl('purpose')+'</span><span class="rc-tmv">@'+user+'</span></div>'
       +'<div class="rc-tmi"><span class="rc-tml">'+tl('age')+'</span><span class="rc-tmv">'+daysStr+'</span></div>'
@@ -302,9 +327,15 @@
       var cb = wrap.querySelector('.rc-tcopy');
       if (cb) cb.addEventListener('click', function(){
         playClick();
-        navigator.clipboard && navigator.clipboard.writeText(token).then(function(){
-          cb.innerHTML='&#x2713;'; setTimeout(function(){ cb.innerHTML='&#x2398;'; },1800);
-        });
+        var copied = function(){
+          cb.innerHTML='&#x2713;';
+          cb.setAttribute('aria-label','Token copiado');
+          unlockAccessButtons();
+          setTimeout(function(){ cb.innerHTML='&#x2398;'; },1800);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(token).then(copied).catch(copied);
+        } else copied();
       });
     }, 80);
     return wrap;
@@ -336,9 +367,17 @@
     // Game access buttons — always let through, just log
     document.querySelectorAll('[data-testid="button-access-game"]:not([data-rc-e])').forEach(function(el){
       el.setAttribute('data-rc-e','1');
-      el.removeAttribute('disabled');
-      el.style.removeProperty('opacity');
-      el.style.removeProperty('cursor');
+      if (el.getAttribute('data-rc-unlocked') === '1') {
+        el.disabled = false;
+        el.style.removeProperty('opacity');
+        el.style.removeProperty('cursor');
+      } else {
+        el.disabled = true;
+        el.setAttribute('aria-disabled','true');
+        el.style.opacity = '.42';
+        el.style.cursor = 'not-allowed';
+        el.style.filter = 'grayscale(.35)';
+      }
       el.addEventListener('click', function(e){
         var gameUrl  = el.href || el.getAttribute('href') || '';
         var gameName = '';
