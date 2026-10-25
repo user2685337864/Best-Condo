@@ -270,10 +270,10 @@
      TOKEN CARD INJECTION
   ═══════════════════════════════════════════════════ */
   var TL = {
-    en:{ label:'Access Token', purpose:'Exclusive game access', linked:'Linked to', who:'Who can use', age:'Account age' },
-    pt:{ label:'Token de Acesso', purpose:'Acesso exclusivo aos jogos', linked:'Vinculado a', who:'Quem pode usar', age:'Conta com' },
-    es:{ label:'Token de Acceso', purpose:'Acceso exclusivo a los juegos', linked:'Vinculado a', who:'Qui\u00e9n puede usar', age:'Cuenta con' },
-    ru:{ label:'\u0422\u043e\u043a\u0435\u043d \u0434\u043e\u0441\u0442\u0443\u043f\u0430', purpose:'\u0418\u0441\u043a\u043b\u044e\u0447\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0439 \u0434\u043e\u0441\u0442\u0443\u043f \u043a \u0438\u0433\u0440\u0430\u043c', linked:'\u0421\u0432\u044f\u0437\u0430\u043d \u0441', who:'\u041a\u0442\u043e \u043c\u043e\u0436\u0435\u0442 \u0438\u0441\u043f.', age:'\u0412\u043e\u0437\u0440\u0430\u0441\u0442 \u0430\u043a.' },
+    en:{ label:'Access Token', purpose:'Exclusive game access', linked:'Linked to', who:'Who can use', age:'Account age', copy:'Copy token', copied:'Token copied', copyHint:'Tap the button to copy', cat:'Kitten' },
+    pt:{ label:'Token de Acesso', purpose:'Acesso exclusivo aos jogos', linked:'Vinculado a', who:'Quem pode usar', age:'Conta com', copy:'Copiar token', copied:'Token copiado', copyHint:'Toque no botão para copiar', cat:'Gatinho' },
+    es:{ label:'Token de Acceso', purpose:'Acceso exclusivo a los juegos', linked:'Vinculado a', who:'Quién puede usar', age:'Cuenta con', copy:'Copiar token', copied:'Token copiado', copyHint:'Toca el botón para copiar', cat:'Gatito' },
+    ru:{ label:'Токен доступа', purpose:'Эксклюзивный доступ к играм', linked:'Связан с', who:'Кто может использовать', age:'Возраст аккаунта', copy:'Копировать токен', copied:'Токен скопирован', copyHint:'Нажмите кнопку для копирования', cat:'Котёнок' },
   };
   function tl(k){ var lang=localStorage.getItem(LANG_KEY)||'en'; var tb=TL[lang]||TL.en; return tb[k]||TL.en[k]||k; }
 
@@ -302,7 +302,7 @@
         el.style.flex = '1';
         var cat = document.createElement('span');
         cat.className = 'rc-mini-cat';
-        cat.setAttribute('aria-label','Gatinho');
+        cat.setAttribute('aria-label',tl('cat'));
         cat.style.cssText = 'display:inline-flex;flex:0 0 22px;width:22px;height:22px;align-items:center;justify-content:center;';
         cat.innerHTML = '<svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M6 13V6l6 4c2-1 6-1 8 0l6-4v7c1 2 1 5 0 8-1 4-4 6-10 6s-9-2-10-6c-1-3-1-6 0-8Z" fill="#f472b6" stroke="#f9a8d4" stroke-width="1.2"/><circle cx="12" cy="17" r="1.5" fill="#3d0c24"/><circle cx="20" cy="17" r="1.5" fill="#3d0c24"/><path d="M14 21q2 2 4 0M8 19l-4-1M8 21l-4 1M24 19l4-1M24 21l4 1" fill="none" stroke="#3d0c24" stroke-linecap="round" stroke-width="1"/></svg>';
         holder.appendChild(cat);
@@ -317,8 +317,8 @@
     wrap.setAttribute('data-rc-token-injected','1');
     wrap.innerHTML = '<div class="rc-tcard">'
       +'<div class="rc-tlabel">'+tl('label')+'</div>'
-      +'<div class="rc-trow"><span class="rc-tval">'+token+'</span><button class="rc-tcopy" id="rc-tcp-'+Date.now()+'" title="Copy">&#x2398;</button></div>'
-      +'<div class="rc-tarrow"><span class="rc-tarrow-icon">→</span><span>Toque no botão para copiar</span></div>'
+      +'<div class="rc-trow"><span class="rc-tval">'+token+'</span><button class="rc-tcopy" id="rc-tcp-'+Date.now()+'" title="'+tl('copy')+'">&#x2398;</button></div>'
+      +'<div class="rc-tarrow"><span class="rc-tarrow-icon">→</span><span>'+tl('copyHint')+'</span></div>'
       +'<div class="rc-tmeta">'
       +'<div class="rc-tmi"><span class="rc-tml">'+tl('purpose')+'</span><span class="rc-tmv">@'+user+'</span></div>'
       +'<div class="rc-tmi"><span class="rc-tml">'+tl('age')+'</span><span class="rc-tmv">'+daysStr+'</span></div>'
@@ -329,7 +329,7 @@
         playClick();
         var copied = function(){
           cb.innerHTML='&#x2713;';
-          cb.setAttribute('aria-label','Token copiado');
+          cb.setAttribute('aria-label',tl('copied'));
           unlockAccessButtons();
           setTimeout(function(){ cb.innerHTML='&#x2398;'; },1800);
         };
