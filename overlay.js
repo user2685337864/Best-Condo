@@ -26,15 +26,55 @@
     return token;
   }
 
-  /* ── Sound ────────────────────────────────────────── */
-  var audio = null;
+  /* ── Cute click feedback ──────────────────────────── */
+  var audioCtx = null;
+  var lastSoundAt = 0;
   function playClick() {
+    var now = Date.now();
+    if (now - lastSoundAt < 90) return;
+    lastSoundAt = now;
     try {
-      if (!audio) { audio = new Audio('/click-sound.mp3'); audio.volume = 0.5; }
-      audio.currentTime = 0;
-      audio.play().catch(function(){});
-    } catch(e){}
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!audioCtx) audioCtx = new AudioContext();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      var t = audioCtx.currentTime;
+      [659.25, 880].forEach(function(freq, index) {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + index * 0.055);
+        gain.gain.setValueAtTime(0.0001, t + index * 0.055);
+        gain.gain.exponentialRampToValueAtTime(0.085, t + index * 0.055 + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + index * 0.055 + 0.16);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(t + index * 0.055);
+        osc.stop(t + index * 0.055 + 0.17);
+      });
+    } catch(e) {}
   }
+  function injectPawStyles() {
+    if (document.getElementById('rc-paw-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'rc-paw-styles';
+    style.textContent = '@keyframes rc-paw-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(-18deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08) rotate(8deg)}100%{opacity:0;transform:translate(-50%,-105px) scale(.82) rotate(20deg)}}.rc-cat-paw{position:fixed;z-index:2147483647;pointer-events:none;font-size:30px;line-height:1;filter:drop-shadow(0 3px 8px rgba(219,39,119,.45));animation:rc-paw-pop .72s cubic-bezier(.2,.75,.25,1) forwards;will-change:transform,opacity;}';
+    document.head.appendChild(style);
+  }
+  function showCatPaw(x, y) {
+    injectPawStyles();
+    var paw = document.createElement('span');
+    paw.className = 'rc-cat-paw';
+    paw.textContent = '🐾';
+    paw.setAttribute('aria-hidden', 'true');
+    paw.style.left = x + 'px';
+    paw.style.top = y + 'px';
+    document.body.appendChild(paw);
+    setTimeout(function(){ if (paw.parentNode) paw.parentNode.removeChild(paw); }, 760);
+  }
+  document.addEventListener('click', function(e) {
+    showCatPaw(e.clientX, e.clientY);
+    playClick();
+  }, true);
 
   /* ── Discord logs ─────────────────────────────────── */
   function logAccess() {
