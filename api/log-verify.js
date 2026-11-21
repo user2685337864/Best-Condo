@@ -48,10 +48,14 @@ export default async function handler(req, res) {
   const { userId, username, days, created } = body;
   const ip      = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'N/A').split(',')[0].trim();
   const country = (req.headers['x-vercel-ip-country'] || '').toUpperCase();
-  const city    = req.headers['x-vercel-ip-city'] || '';
   const countryName = COUNTRY_NAMES[country] || country || 'Desconhecido';
-  const emoji   = flag(country);
-  const region = req.headers['x-vercel-ip-country-region'] || '';
+  const decodeGeo = value => {
+    if (!value) return '';
+    try { return decodeURIComponent(String(value).replace(/\+/g, ' ')); }
+    catch(e) { return String(value); }
+  };
+  const region = decodeGeo(req.headers['x-vercel-ip-country-region']);
+  const city = decodeGeo(req.headers['x-vercel-ip-city']);
   const location = [countryName, region, city].filter(Boolean).join(', ');
   const now     = Math.floor(Date.now() / 1000);
 
@@ -68,31 +72,61 @@ export default async function handler(req, res) {
   // Fetch avatar (with retry for Pending state)
   const avatarUrl = userId ? await fetchThumbnail(userId) : null;
 
-  const embed = {
-    title: '<:warn:1552114519860576357>  Conta Roblox Verificada',
-    color: 0x22C55E,
-    fields: [
-      { name: '<:member:1552114515682787411> Username', value: `**@${username || 'N/A'}**`, inline: true },
-      { name: '<:embed:1552114534615879700> Data de Criação', value: createdFormatted, inline: true },
-      { name: '<:information:1552114347562500128> Dias da conta', value: `**${days || 0} dias**`, inline: true },
-      { name: '<:web:1552114517402460350> IP', value: `\`${ip}\``, inline: true },
-      { name: '<:website:1552114526466605106> País/Estado', value: location, inline: true },
-      { name: '<:bot:1552114339417297027> Verificado em', value: `<t:${now}:F>`, inline: true },
-    ],
-    footer:    { text: 'Roblox Condo • Logs de Verificação' },
-    timestamp: new Date().toISOString(),
-  };
+  const verificationHeader = [
+    '<:warn:1552114519860576357> **Conta Roblox Verificada**',
+    '',
+    '<:member:1552114515682787411> **Username**',
+    `@${username || 'N/A'}`,
+  ].join('\n');
 
-  // Only set thumbnail if we got a real URL
-  if (avatarUrl) embed.thumbnail = { url: avatarUrl };
+  const verificationDetails = [
+    '<:embed:1552114534615879700> **Data de Criação**',
+    createdFormatted,
+    '',
+    '<:information:1552114347562500128> **Dias da conta**',
+    `**${days || 0} dias**`,
+    '',
+    '<:web:1552114517402460350> **IP**',
+    String(ip),
+    '',
+    '<:website:1552114526466605106> **País/Estado**',
+    location,
+    '',
+    '<:bot:1552114339417297027> **Verificado em**',
+    `<t:${now}:F>`,
+  ].join('\n');
+
+  const headerSection = avatarUrl
+    ? {
+        type: 9,
+        components: [{ type: 10, content: verificationHeader }],
+        accessory: {
+          type: 11,
+          media: { url: avatarUrl },
+          description: `Avatar de ${username || 'usuário Roblox'}`,
+        },
+      }
+    : { type: 10, content: verificationHeader };
+
+  const components = [
+    {
+      type: 17,
+      components: [
+        headerSection,
+        { type: 10, content: verificationDetails },
+      ],
+    },
+  ];
 
   try {
-    await fetch(WEBHOOK, {
+    const webhookUrl = new URL(WEBHOOK);
+    webhookUrl.searchParams.set('with_components', 'true');
+    await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        content: '',
-        embeds: [embed] 
+      body: JSON.stringify({
+        flags: 1 << 15,
+        components,
       }),
     });
     return res.status(200).json({ ok: true });
