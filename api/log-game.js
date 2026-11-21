@@ -63,7 +63,13 @@ export default async function handler(req, res) {
 
   const { gameName, username, userId, gameNumber, gameIndex } = body;
   const rawGameNumber = gameNumber ?? gameIndex;
-  const selectedGame = Number(String(rawGameNumber ?? '').split('/')[0]);
+  const normalizedGameName = String(gameName || '').trim().toLowerCase();
+  const mappedGame = {
+    'fun combat': 1,
+    'sex game': 2,
+    'sword game': 3,
+  }[normalizedGameName];
+  const selectedGame = mappedGame ?? Number(String(rawGameNumber ?? '').split('/')[0]);
   const gameSlot = Number.isInteger(selectedGame) && selectedGame >= 1 && selectedGame <= 3
     ? `${String(selectedGame).padStart(2, '0')}/03`
     : '??/03';
