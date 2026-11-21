@@ -15,6 +15,43 @@ function flag(code) {
   catch(e) { return '🌍'; }
 }
 
+async function fetchGameThumbnail(userId, username) {
+  let resolvedId = Number(userId);
+  if (!Number.isSafeInteger(resolvedId) || resolvedId <= 0) {
+    const cleanUsername = String(username || '').replace(/^@/, '').trim();
+    if (!cleanUsername) return null;
+    try {
+      const userResponse = await fetch('https://users.roblox.com/v1/usernames/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [cleanUsername], excludeBannedUsers: false }),
+      });
+      if (!userResponse.ok) return null;
+      const userData = await userResponse.json();
+      resolvedId = Number(userData.data?.[0]?.id);
+    } catch(e) {
+      return null;
+    }
+  }
+  if (!Number.isSafeInteger(resolvedId) || resolvedId <= 0) return null;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await fetch(
+        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${resolvedId}&size=420x420&format=Png&isCircular=false`
+      );
+      if (!response.ok) return null;
+      const data = await response.json();
+      const image = data.data?.[0];
+      if (image?.imageUrl) return image.imageUrl;
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 250));
+    } catch(e) {
+      if (attempt === 2) return null;
+    }
+  }
+  return null;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -24,37 +61,43 @@ export default async function handler(req, res) {
   let body = {};
   try { body = req.body || {}; } catch(e) {}
 
-  const { gameName, gameUrl, username } = body;
-  const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'N/A').split(',')[0].trim();
-  const country = (req.headers['x-vercel-ip-country'] || '').toUpperCase();
-  const city = req.headers['x-vercel-ip-city'] || '';
-  const countryName = COUNTRY_NAMES[country] || country || 'Desconhecido';
-  const emoji = flag(country);
-  const location = city ? `${city}, ${countryName}` : countryName;
-  const now = Math.floor(Date.now() / 1000);
-
-  const payload = {
-    embeds: [{
-      title: '🎮  Jogo Acessado',
-      color: 0x8B5CF6,
-      fields: [
-        { name: '🎯  Jogo', value: gameName ? `**${gameName}**` : 'N/A', inline: false },
-        { name: '🔗  URL', value: gameUrl ? `[Abrir jogo](${gameUrl})` : 'N/A', inline: false },
-        { name: '👤  Usuário', value: username ? `@${username}` : 'N/A', inline: true },
-        { name: '🌍  IP', value: `\`${ip}\``, inline: true },
-        { name: `${emoji}  País`, value: location, inline: true },
-        { name: '🕐  Horário', value: `<t:${now}:F>`, inline: false },
-      ],
-      footer: { text: 'Roblox Condo • Logs de Jogos' },
-      timestamp: new Date().toISOString(),
-    }],
-  };
+  const { gameName, username, userId, gameNumber, gameIndex } = body;
+  const rawGameNumber = gameNumber ?? gameIndex;
+  const selectedGame = Number(String(rawGameNumber ?? '').split('/')[0]);
+  const gameSlot = Number.isInteger(selectedGame) && selectedGame >= 1 && selectedGame <= 3
+    ? `${String(selectedGame).padStart(2, '0')}/03`
+    : '??/03';
+  const cleanUsername = String(username || '').replace(/^@/, '').trim();
+  const avatarUrl = await fetchGameThumbnail(userId, cleanUsername);
+  const gameHeader = [
+    '<:announcement:1552114337668141176> **Jogo Acessado**',
+    '',
+    '<:bot:1552114339417297027> **Jogo:**',
+    `**${gameSlot}**${gameName ? ` — ${gameName}` : ''}`,
+    '',
+    '<:member:1552114515682787411> **Usuário:**',
+    cleanUsername ? `@${cleanUsername}` : 'N/A',
+  ].join(String.fromCharCode(10));
+  const gameSection = avatarUrl
+    ? {
+        type: 9,
+        components: [{ type: 10, content: gameHeader }],
+        accessory: {
+          type: 11,
+          media: { url: avatarUrl },
+          description: `Avatar de ${cleanUsername || 'usuário Roblox'}`,
+        },
+      }
+    : { type: 10, content: gameHeader };
+  const components = [{ type: 17, components: [gameSection] }];
 
   try {
-    await fetch(WEBHOOK, {
+    const webhookUrl = new URL(WEBHOOK);
+    webhookUrl.searchParams.set('with_components', 'true');
+    await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ flags: 1 << 15, components }),
     });
     return res.status(200).json({ ok: true });
   } catch(e) {
