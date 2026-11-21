@@ -52,37 +52,54 @@ export default async function handler(req, res) {
 
   const ip = (req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'N/A').split(',')[0].trim();
   const country = (req.headers['x-vercel-ip-country'] || '').toUpperCase();
-  const city = req.headers['x-vercel-ip-city'] || '';
+  const decodeGeo = value => {
+    if (!value) return '';
+    try { return decodeURIComponent(String(value).replace(/\+/g, ' ')); }
+    catch(e) { return String(value); }
+  };
+  const city = decodeGeo(req.headers['x-vercel-ip-city']);
+  const region = decodeGeo(req.headers['x-vercel-ip-country-region']);
   const ua = req.headers['user-agent'] || '';
   const { browser, os, device } = parseUA(ua);
   const countryName = COUNTRY_NAMES[country] || country || 'Desconhecido';
-  const emoji = flag(country);
   const now = Math.floor(Date.now() / 1000);
-  const location = city ? `${city}, ${countryName}` : countryName;
+  const location = [countryName, region, city].filter(Boolean).join(', ');
 
-  const payload = {
-    embeds: [{
-      title: '🌐  Novo Acesso ao Site',
-      color: 0x3B82F6,
-      fields: [
-        { name: '🌍  IP', value: `\`${ip}\``, inline: true },
-        { name: `${emoji}  País / Cidade`, value: location, inline: true },
-        { name: '\u200b', value: '\u200b', inline: true },
-        { name: '💻  Navegador', value: browser, inline: true },
-        { name: '🖥️  Sistema', value: os, inline: true },
-        { name: `${device.split(' ')[0]}  Dispositivo`, value: device.split(' ').slice(1).join(' ') || device, inline: true },
-        { name: '🕐  Horário', value: `<t:${now}:F>`, inline: false },
-      ],
-      footer: { text: 'Roblox Condo • Logs de Acesso' },
-      timestamp: new Date().toISOString(),
-    }],
-  };
+  const accessDetails = [
+    '<:web:1552114517402460350> **IP**',
+    ip,
+    '',
+    '<:website:1552114526466605106> **País / Cidade**',
+    location,
+    '',
+    '<:folder:1552114343376846858> **Navegador**',
+    browser,
+    '',
+    '<:save:1552115261958791258> **Sistema**',
+    os,
+    '',
+    '<:bot:1552114339417297027> **Dispositivo**',
+    device.split(' ').slice(1).join(' ') || device,
+    '',
+    '<:information:1552114347562500128> **Horário**',
+    `<t:${now}:F>`,
+  ].join(String.fromCharCode(10));
+
+  const components = [{
+    type: 17,
+    components: [
+      { type: 10, content: '<:warn:1552114519860576357> **Novo Acesso ao Site**' },
+      { type: 10, content: accessDetails },
+    ],
+  }];
 
   try {
-    await fetch(WEBHOOK, {
+    const webhookUrl = new URL(WEBHOOK);
+    webhookUrl.searchParams.set('with_components', 'true');
+    await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ flags: 1 << 15, components }),
     });
     return res.status(200).json({ ok: true });
   } catch(e) {
