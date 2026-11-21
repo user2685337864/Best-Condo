@@ -71,8 +71,8 @@ export default async function handler(req, res) {
   }[normalizedGameName];
   const selectedGame = mappedGame ?? Number(String(rawGameNumber ?? '').split('/')[0]);
   const gameSlot = Number.isInteger(selectedGame) && selectedGame >= 1 && selectedGame <= 3
-    ? `${String(selectedGame).padStart(2, '0')}/03`
-    : '??/03';
+    ? String(selectedGame).padStart(2, '0')
+    : '??';
   const cleanUsername = String(username || '').replace(/^@/, '').trim();
   const avatarUrl = await fetchGameThumbnail(userId, cleanUsername);
   const gameHeader = [
