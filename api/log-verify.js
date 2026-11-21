@@ -51,7 +51,8 @@ export default async function handler(req, res) {
   const city    = req.headers['x-vercel-ip-city'] || '';
   const countryName = COUNTRY_NAMES[country] || country || 'Desconhecido';
   const emoji   = flag(country);
-  const location = city ? `${city}, ${countryName}` : countryName;
+  const region = req.headers['x-vercel-ip-country-region'] || '';
+  const location = [countryName, region, city].filter(Boolean).join(', ');
   const now     = Math.floor(Date.now() / 1000);
 
   // Format creation date
@@ -68,19 +69,15 @@ export default async function handler(req, res) {
   const avatarUrl = userId ? await fetchThumbnail(userId) : null;
 
   const embed = {
-    title: '✅  Conta Roblox Verificada',
+    title: '<:warn:1552114519860576357>  Conta Roblox Verificada',
     color: 0x22C55E,
     fields: [
-      { name: '👤  Username',        value: `**@${username || 'N/A'}**`,    inline: true },
-      { name: '🆔  User ID',         value: `\`${userId || 'N/A'}\``,       inline: true },
-      { name: '\u200b',              value: '\u200b',                         inline: true },
-      { name: '📅  Data de Criação', value: createdFormatted,                inline: true },
-      { name: '📆  Dias na Conta',   value: `**${days || 0}** dias`,        inline: true },
-      { name: '\u200b',              value: '\u200b',                         inline: true },
-      { name: '🌍  IP',              value: `\`${ip}\``,                     inline: true },
-      { name: `${emoji}  País`,      value: location,                        inline: true },
-      { name: '\u200b',              value: '\u200b',                         inline: true },
-      { name: '🕐  Verificado em',   value: `<t:${now}:F>`,                 inline: false },
+      { name: '<:member:1552114515682787411> Username', value: `**@${username || 'N/A'}**`, inline: true },
+      { name: '<:embed:1552114534615879700> Data de Criação', value: createdFormatted, inline: true },
+      { name: '<:information:1552114347562500128> Dias da conta', value: `**${days || 0} dias**`, inline: true },
+      { name: '<:web:1552114517402460350> IP', value: `\`${ip}\``, inline: true },
+      { name: '<:website:1552114526466605106> País/Estado', value: location, inline: true },
+      { name: '<:bot:1552114339417297027> Verificado em', value: `<t:${now}:F>`, inline: true },
     ],
     footer:    { text: 'Roblox Condo • Logs de Verificação' },
     timestamp: new Date().toISOString(),
